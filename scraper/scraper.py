@@ -46,7 +46,6 @@ class TransportLine(object):
                                      f"found and we want to get at least {self.n_results}")
 
         for connection in connection_boxes[:self.n_results]:
-            print(connection, "\n \n\n")
             results.append(self._parse_times(connection))
 
         return "\n".join(results)
@@ -77,13 +76,13 @@ class TransportLine(object):
 
 
     def _parse_times(self, connection):
-        time_div = connection.find_all(attrs={'class': "reset stations first last"})
-        line_name = connection.find_all(
-            title = [re.compile('metro.+'), re.compile('tramvaj.+'), re.compile('autobus.+')])[0].text
-        arrival_time = time_div[0].find(self._is_first_station_time)
-        print(arrival_time)
-        arrival_time = time_div[0].find(self._is_first_station_time).text
-        print(arrival_time)
+        try:
+            time_div = connection.find_all(attrs={'class': "reset stations first last"})
+            line_name = connection.find_all(
+                title = [re.compile('metro.+'), re.compile('tramvaj.+'), re.compile('autobus.+')])[0].text
+            arrival_time = time_div[0].find(self._is_first_station_time).text
+        except:
+            raise TransportLineError("Unexpected form of HTML file.")
 
 
         # get the time delta from now
