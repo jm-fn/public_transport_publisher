@@ -1,0 +1,56 @@
+#:kivy 2.0.0
+#:import sys sys
+
+<Button>:
+    font_size: 50
+
+<Label>:
+    font_size: 50
+
+MyScreenManager:
+    MenuScreen
+    InfoScreen
+    ErrorScreen
+
+<ErrorScreen>:
+    name:'_error_'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'An error occured:'
+        Label:
+            text: str(root.manager.error_text)
+        Button:
+            text: 'Return to Main Screen'
+            on_press: root.manager.current = '_menu_'
+
+
+<MenuScreen>:
+    name: '_menu_'
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            text: 'Motol'
+            on_press: root.btn_callback(self)
+        Button:
+            text: 'Karlak'
+            on_press: root.btn_callback(self)
+        Button:
+            text: 'Centrum'
+            on_press: root.btn_callback(self)
+        Button:
+            text: 'Quit'
+            on_press: sys.exit()
+
+<InfoScreen>:
+    name: '_info_'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: str(root.manager.info_text)
+            font_size: 50
+            size_hint: (1, 0.8)
+        Button:
+            text: 'Back to menu'
+            on_press: root.manager.current = '_menu_'
+            size_hint: (1, 0.2)
