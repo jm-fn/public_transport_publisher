@@ -1,0 +1,35 @@
+---
+- name: Install drivers 
+  hosts: host c
+
+  tasks:
+    - name: Clone waveshare LCD Drivers
+      git:
+        repo: https://github.com/waveshare/LCD-show.git
+        dest: ~/LCD-drivers
+        update: no
+
+    - name: Chmod LCD Drivers
+      command: chmod +x LCD32C-show
+      args:
+        chdir: ~/LCD-drivers
+
+    - name: Fix references in LCD Driver code
+      # Do the command twice, since this sed only replaces first occurence in line
+      shell: |
+        grep \/pi\/LCD-show -r . -l | xargs sed -i -e 's/\/home\/pi\/LCD-show/\/home\/{{ ansible_user }}\/LCD-drivers/'
+        grep \/pi\/LCD-show -r . -l | xargs sed -i -e 's/\/home\/pi\/LCD-show/\/home\/{{ ansible_user }}\/LCD-drivers/'
+      args:
+        chdir: ~/LCD-drivers
+      register: result
+      ignore_errors: yes
+
+    - name: Print result
+      debug:
+        var: result
+
+    - name: Install LCD Drivers
+      command: bash ./LCD32C-show
+      args:
+        chdir: ~/LCD-drivers
+

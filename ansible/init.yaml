@@ -1,0 +1,64 @@
+---
+- name: Install neccesities 
+  hosts: host 
+
+  tasks:
+    - name: Install vim
+      apt:
+        name: vim
+        state: present
+      become: yes
+
+    - name: Install kivy dependencies
+      apt:
+        name: 
+          - python3-setuptools
+          - git-core
+          - python3-dev
+          - libsdl2-2.0-0
+          - libsdl2-image-2.0-0
+          - libsdl2-mixer-2.0-0
+          - libsdl2-ttf-2.0-0
+      become: yes
+
+    - name: Setup autologin for client {{ ansible_user }}
+      blockinfile:
+        path: /etc/lightdm/lightdm.conf
+        block: |
+          [SeatDefaults]
+          autologin-user={{ ansible_user }}
+          autologin-user-timeout=0
+      become: yes
+      tags: autologin
+
+
+    - name: Clone Transport Publisher Git Repo
+      git:
+        repo: https://github.com/jm-fn/public_transport_publisher.git
+        dest: ~/ptp
+        update: yes
+        force: yes
+      tags: clone
+
+    - name: Make the gui fullscreen
+      command: sed -i 's/# Window.fullscreen/Window.fullscreen/' gui/main.py
+      args:
+        chdir: ~/ptp
+      tags: clone
+
+    - name: Create directory for autostart config
+      ansible.builtin.file:
+        path: ~/.config/lxsession/LXDE-pi/
+        state: directory
+        mode: '0755'
+      tags: autostart
+
+    - name: Setup autostart task
+      copy:
+        dest: ~/.config/lxsession/LXDE-pi/autostart
+        content: |
+           @lxpanel --profile LXDE-pi
+           @pcmanfm --desktop --profile LXDE-pi
+           @xscreensaver -no-splash
+           @lxterminal -e ptp/autostart.sh
+      tags: autostart
